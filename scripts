@@ -1,3 +1,5 @@
+getserver -sb
+
 bash /data/p_03140/scripts/qc/load_surfs.sh 0076 01 /data/p_03140/BIDSspacetop/derivatives freesurfer  #create environment
 
 bash /data/p_03140/scripts/qc/recon_all_qc.sh 0076 01 /data/p_03140/BIDS_spacetop/derivatives/freesurfer  #run QC
