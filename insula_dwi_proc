@@ -10,12 +10,10 @@ for set_directories = 1
     % directories
     GH = '/data/u_royer_software';
     micaopen = [GH, '/micaopen'];
-    micasoft = [GH, '/micasoft-master'];
     micapipe = [GH, '/micapipe'];
     dataset = '/data/p_03140/BIDS_spacetop';
     deriv_dir = [dataset, '/derivatives'];
     micapipe_deriv = [deriv_dir, '/micapipe_v0.2.0'];
-    fmriprep_deriv = [deriv_dir, '/fmriprep'];
     
     % set path
     addpath(genpath([micaopen,'/surfstat']));
@@ -34,22 +32,23 @@ end
 
 %% subject info
 
-id = 'sub-0009';
+id = 'sub-0017';
 ses = 'ses-01';
-func_mp_dir = [micapipe_deriv, '/', id, '/', ses, '/func/'];
+dwi_maps_dir = [micapipe_deriv, '/', id, '/', ses, '/maps/'];
 
 %% task info
 
-task = 'task-alignvideo_acq-mb8_run-01_desc-preproc_bold';
-func_task_dir = [func_mp_dir, '/', task];
-func_task_surf_dir = [func_task_dir, '/surf'];
+hemi = 'L';
+metric = 'FA';
+surf = 'fsLR-32k'
+label = 'midthickness'
 
 %% Load parcellation
 
 parcName = 'schaefer-400';
 for load_parc = 1
     
-    % Read parccellation for C69
+    % Read parcellation for C69
     parcFS = csvread([micapipe, '/parcellations/', parcName, '_conte69.csv']);
     parcFS = parcFS + 1;
 
@@ -66,8 +65,8 @@ end
 %% load timeseries: vertex
 
 % 32k
-fslr32k = gifti([func_task_surf_dir, '/', id, '_', ses, '_surf-fsLR-32k_desc-timeseries_clean.shape.gii']);
-fslr32k = fslr32k.cdata;
+data = gifti(dwi_maps_dir, '/', id, '_', ses, '_hemi-', hemi, '_surf-',surf,'_label-',label,'_',metric,'.func.gii']);
+data = fslr32k.cdata;
 % viz
 tp = 10;
 figure, SurfStatViewData(fslr32k(tp,:),surf); colormap(parula); SurfStatColLim([-20000, 20000])
