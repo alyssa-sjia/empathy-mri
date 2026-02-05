@@ -2,7 +2,7 @@
 % NOTE : dependencies
 % micaopen: SurfStat - see also BrainStat for similar functions
 % micasoft: mica_parcelData2surfData
-% gifti: in micasoft but can also be downaloded directly
+% gifti: in micasoft but can also be downloaded directly
 % micapipe: surface files
 
 for set_directories = 1
@@ -64,9 +64,9 @@ end
 
 %% load timeseries: vertex
 
-% 32k
 data = gifti(dwi_maps_dir, '/', id, '_', ses, '_hemi-', hemi, '_surf-',surf,'_label-',label,'_',metric,'.func.gii']);
 data = fslr32k.cdata;
+
 % viz
 tp = 10;
 figure, SurfStatViewData(fslr32k(tp,:),surf); colormap(parula); SurfStatColLim([-20000, 20000])
