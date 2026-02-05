@@ -1,0 +1,134 @@
+%% init
+% NOTE : dependencies
+% micaopen: SurfStat - see also BrainStat for similar functions
+% micasoft: mica_parcelData2surfData
+% gifti: in micasoft but can also be downaloded directly
+% micapipe: surface files
+
+for set_directories = 1
+    
+    % directories
+    GH = '/data/u_royer_software';
+    micaopen = [GH, '/micaopen'];
+    micasoft = [GH, '/micasoft-master'];
+    micapipe = [GH, '/micapipe'];
+    dataset = '/data/p_03140/BIDS_spacetop';
+    deriv_dir = [dataset, '/derivatives'];
+    micapipe_deriv = [deriv_dir, '/micapipe_v0.2.0'];
+    fmriprep_deriv = [deriv_dir, '/fmriprep'];
+    
+    % set path
+    addpath(genpath([micaopen,'/surfstat']));
+    addpath(genpath([micaopen,'/mica_powertools']));
+    addpath(genpath([micasoft,'/matlab/gifti-1.6']));
+
+    % surface
+    tmp = gifti([micapipe,'/surfaces/fsLR-32k.L.surf.gii']);
+    lh = struct(); lh.coord = tmp.vertices'; lh.tri = tmp.faces;
+    tmp = gifti([micapipe,'/surfaces/fsLR-32k.R.surf.gii']);
+    rh = struct(); rh.coord = tmp.vertices'; rh.tri = tmp.faces;
+    clear tmp
+    surf = struct(); surf.coord = [lh5k.coord, rh5k.coord]; surf.tri = [lh.tri; rh.tri+max(max(lh.tri))]; 
+    nFS = length(surf.coord);
+end
+
+%% subject info
+
+id = 'sub-0009';
+ses = 'ses-01';
+func_mp_dir = [micapipe_deriv, '/', id, '/', ses, '/func/'];
+
+%% task info
+
+task = 'task-alignvideo_acq-mb8_run-01_desc-preproc_bold';
+func_task_dir = [func_mp_dir, '/', task];
+func_task_surf_dir = [func_task_dir, '/surf'];
+
+%% Load parcellation
+
+parcName = 'schaefer-400';
+for load_parc = 1
+    
+    % Read parccellation for C69
+    parcFS = csvread([micapipe, '/parcellations/', parcName, '_conte69.csv']);
+    parcFS = parcFS + 1;
+
+    uparc = unique(parcFS);
+    parcFSR = parcFS(nFS/2+1:end);
+    uparcR = unique(parcFSR);
+    
+    maskCol = 1; % value of mask in parcellation
+    maskIdxFS = find(parcFS == maskCol(1));
+    maskParc = zeros(1,nFS); maskParc(1,maskIdxFS) = 1;
+    
+end
+
+%% load timeseries: vertex
+
+% 32k
+fslr32k = gifti([func_task_surf_dir, '/', id, '_', ses, '_surf-fsLR-32k_desc-timeseries_clean.shape.gii']);
+fslr32k = fslr32k.cdata;
+% viz
+tp = 10;
+figure, SurfStatViewData(fslr32k(tp,:),surf); colormap(parula); SurfStatColLim([-20000, 20000])
+
+% smooth
+fslr32k_sm = SurfStatSmooth(fslr32k, surf, 10);
+
+% corr
+seed = 13384; % left precuneus vertex
+r = corr(fslr32k_sm(:,seed), fslr32k_sm);
+z = .5 * log( (1+r) ./ (1-r) );
+% viz
+figure, SurfStatViewData(z,surf); colormap(parula); SurfStatColLim([0, 1])
+
+%% load FC: parcellation
+
+fc = gifti([func_task_surf_dir, '/', id, '_', ses, '_atlas-', parcName,'_desc-FC.shape.gii']);
+fc = fc.cdata;
+fc = fc + fc';
+diagonalMask = logical(eye(size(fc)));
+fc(diagonalMask) = 0;
+z = .5 * log( (1+fc) ./ (1-fc) );
+
+% define indices for subcortex, cerebellum, and cortex
+sctx = 1:14;
+cerebel = 15:48;
+ctx = 49:size(z,1);
+
+% remake FC to keep what we want
+fcSctx = z(sctx, :);
+fcCerebel = z(cerebel, :); 
+fcCtx = z(ctx,:); 
+
+fcStxCtx = [fcSctx;fcCtx];
+fcStxCtx(:,cerebel) = []; % remove cerebellum
+ctxStart = length(sctx)+1;
+
+%% Visualization
+
+% left and right thalamus: cortical connectivity
+seed = 1; 
+seedFC = fcStxCtx(seed,:);
+data = mica_parcelData2surfData(seedFC(ctxStart:end), surf, parcFS);
+data(maskParc == 1) = 0;
+figure, SurfStatViewData(data, surf), colormap("parula"); SurfStatColLim([0 1])
+
+seed = 8;
+seedFC = fcStxCtx(seed,:);
+data = mica_parcelData2surfData(seedFC(ctxStart:end), surf, parcFS);
+data(maskParc == 1) = 0;
+figure, SurfStatViewData(data, surf), colormap("parula"); SurfStatColLim([0 1])
+
+% Left and right dlpfc: cortical connectivity
+seed = 195; 
+seedFC = fcStxCtx(seed,:);
+data = mica_parcelData2surfData(seedFC(ctxStart:end), surf, parcFS);
+data(maskParc == 1) = 0;
+figure, SurfStatViewData(data, surf), colormap("parula"); SurfStatColLim([0 1])
+
+seed = 401;
+seedFC = fcStxCtx(seed,:);
+data = mica_parcelData2surfData(seedFC(ctxStart:end), surf, parcFS);
+data(maskParc == 1) = 0;
+figure, SurfStatViewData(data, surf), colormap("parula"); SurfStatColLim([0 1])
