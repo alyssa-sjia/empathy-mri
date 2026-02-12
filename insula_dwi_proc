@@ -36,7 +36,7 @@ id = 'sub-0017';
 ses = 'ses-01';
 dwi_maps_dir = [micapipe_deriv, '/', id, '/', ses, '/maps/'];
 
-%% task info
+%% structural info
 
 hemi = 'L';
 metric = 'FA';
@@ -44,7 +44,7 @@ surf = 'fsLR-32k'
 label = 'midthickness'
 
 
-% Load diffusion file
+% load diffusion file
 
 fname = (dwi_maps_dir, '/', id, '_', ses, '_hemi-', hemi, '_surf-',surf,'_label-',label,'_',metric,'.func.gii');
 
@@ -77,8 +77,8 @@ for load_parc = 1
     end
 
     % Sanity check
-    if length(parcHemi) ~= length(data)
-        error('Parcellation and diffusion data do not match in vertex count.')
+    if nHemi ~= nVert
+        error('Parcellation and diffusion vertices unequal')
     end
   
     % uparcR = unique(parcFSR);
