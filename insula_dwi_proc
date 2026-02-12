@@ -45,7 +45,7 @@ label = 'midthickness'
 
 %% Load parcellation
 
-parcName = 'schaefer-400';
+parcName = 'economo';
 for load_parc = 1
     
     % Read parcellation for C69
@@ -71,15 +71,7 @@ data = fslr32k.cdata;
 tp = 10;
 figure, SurfStatViewData(fslr32k(tp,:),surf); colormap(parula); SurfStatColLim([-20000, 20000])
 
-% smooth
-fslr32k_sm = SurfStatSmooth(fslr32k, surf, 10);
-
-% corr
-seed = 13384; % left precuneus vertex
-r = corr(fslr32k_sm(:,seed), fslr32k_sm);
-z = .5 * log( (1+r) ./ (1-r) );
-% viz
-figure, SurfStatViewData(z,surf); colormap(parula); SurfStatColLim([0, 1])
+% deleted smooth and corr
 
 %% load FC: parcellation
 
