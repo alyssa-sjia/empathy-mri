@@ -43,6 +43,18 @@ metric = 'FA';
 surf = 'fsLR-32k'
 label = 'midthickness'
 
+
+% Load diffusion file
+
+fname = (dwi_maps_dir, '/', id, '_', ses, '_hemi-', hemi, '_surf-',surf,'_label-',label,'_',metric,'.func.gii');
+
+g = gifti(fname);
+data = g.cdata;
+% data = fslr32k.cdata;
+
+nVert = length(data);
+
+
 %% Load parcellation
 
 parcName = 'economo';
@@ -77,13 +89,6 @@ for load_parc = 1
     
 end
 
-%% load timeseries: vertex
-
-data = gifti(dwi_maps_dir, '/', id, '_', ses, '_hemi-', hemi, '_surf-',surf,'_label-',label,'_',metric,'.func.gii');
-data = fslr32k.cdata;
-
-length(data)
-length(parcFS)
 
 % viz
 tp = 10;
