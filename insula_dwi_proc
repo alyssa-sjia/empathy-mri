@@ -50,7 +50,6 @@ fname = (dwi_maps_dir, '/', id, '_', ses, '_hemi-', hemi, '_surf-',surf,'_label-
 
 g = gifti(fname);
 data = g.cdata;
-% data = fslr32k.cdata;
 
 nVert = length(data);
 
