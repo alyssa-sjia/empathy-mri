@@ -46,6 +46,8 @@ label = 'midthickness'
 %% Load parcellation
 
 parcName = 'economo';
+parcIDs = [1013 1018 1019];
+
 for load_parc = 1
     
     % Read parcellation for C69
