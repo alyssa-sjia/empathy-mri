@@ -18,7 +18,7 @@ for set_directories = 1
     % set path
     addpath(genpath([micaopen,'/surfstat']));
     addpath(genpath([micaopen,'/mica_powertools']));
-    addpath(genpath([micasoft,'/matlab/gifti-1.6']));
+    % addpath(genpath([micasoft,'/matlab/gifti-1.6']));
 
     % surface
     tmp = gifti([micapipe,'/surfaces/fsLR-32k.L.surf.gii']);
@@ -66,8 +66,11 @@ end
 
 %% load timeseries: vertex
 
-data = gifti(dwi_maps_dir, '/', id, '_', ses, '_hemi-', hemi, '_surf-',surf,'_label-',label,'_',metric,'.func.gii']);
+data = gifti(dwi_maps_dir, '/', id, '_', ses, '_hemi-', hemi, '_surf-',surf,'_label-',label,'_',metric,'.func.gii');
 data = fslr32k.cdata;
+
+length(data)
+length(parcFS)
 
 % viz
 tp = 10;
