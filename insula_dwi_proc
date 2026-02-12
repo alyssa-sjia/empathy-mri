@@ -53,14 +53,27 @@ for load_parc = 1
     % Read parcellation for C69
     parcFS = csvread([micapipe, '/parcellations/', parcName, '_conte69.csv']);
     parcFS = parcFS + 1;
-
     uparc = unique(parcFS);
-    parcFSR = parcFS(nFS/2+1:end);
-    uparcR = unique(parcFSR);
+
+    nTotal = length(parcFS);
+    nHemi  = nTotal / 2;
+
+    if hemi == 'L'
+        parcHemi = parcFS(1:nHemi);
+    elseif hemi == 'R'
+        parcHemi = parcFS(nHemi+1:end);
+    end
+
+    % Sanity check
+    if length(parcHemi) ~= length(data)
+        error('Parcellation and diffusion data do not match in vertex count.')
+    end
+  
+    % uparcR = unique(parcFSR);
     
     maskCol = 1; % value of mask in parcellation
     maskIdxFS = find(parcFS == maskCol(1));
-    maskParc = zeros(1,nFS); maskParc(1,maskIdxFS) = 1;
+    % maskParc = zeros(1,nFS); maskParc(1,maskIdxFS) = 1;
     
 end
 
