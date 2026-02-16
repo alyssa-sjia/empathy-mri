@@ -21,7 +21,7 @@ for set_directories = 1
     addpath(genpath([micaopen,'/surfstat']));
     addpath(genpath([micaopen,'/mica_powertools']));
     addpath(genpath([micasoft,'/matlab/gifti-1.6']));
-    addpath(genpath([GH, '/gifti']));
+    % addpath(genpath([GH, '/gifti']));
 
     % surface
     tmp = gifti([micapipe,'/surfaces/fsLR-32k.L.surf.gii']);
