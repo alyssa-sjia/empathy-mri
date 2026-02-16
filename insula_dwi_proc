@@ -12,6 +12,7 @@ for set_directories = 1
     micaopen = [GH, '/micaopen'];
     micapipe = [GH, '/micapipe'];
     micasoft = [GH, '/micasoft-master'];
+    gifti  = [GH, '/gifti'];
     dataset = '/data/p_03140/BIDS_spacetop';
     deriv_dir = [dataset, '/derivatives'];
     micapipe_deriv = [deriv_dir, '/micapipe_v0.2.0'];
@@ -20,6 +21,7 @@ for set_directories = 1
     addpath(genpath([micaopen,'/surfstat']));
     addpath(genpath([micaopen,'/mica_powertools']));
     addpath(genpath([micasoft,'/matlab/gifti-1.6']));
+    % addpath(genpath([gifti, ]));
 
     % surface
     tmp = gifti([micapipe,'/surfaces/fsLR-32k.L.surf.gii']);
