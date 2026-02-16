@@ -19,7 +19,7 @@ for set_directories = 1
     % set path
     addpath(genpath([micaopen,'/surfstat']));
     addpath(genpath([micaopen,'/mica_powertools']));
-    % addpath(genpath([micasoft,'/matlab/gifti-1.6']));
+    addpath(genpath([micasoft,'/matlab/gifti-1.6']));
 
     % surface
     tmp = gifti([micapipe,'/surfaces/fsLR-32k.L.surf.gii']);
@@ -27,7 +27,7 @@ for set_directories = 1
     tmp = gifti([micapipe,'/surfaces/fsLR-32k.R.surf.gii']);
     rh = struct(); rh.coord = tmp.vertices'; rh.tri = tmp.faces;
     clear tmp
-    surf = struct(); surf.coord = [lh5k.coord, rh5k.coord]; surf.tri = [lh.tri; rh.tri+max(max(lh.tri))]; 
+    surf = struct(); surf.coord = [lh.coord, rh.coord]; surf.tri = [lh.tri; rh.tri+max(max(lh.tri))]; 
     nFS = length(surf.coord);
 end
 
@@ -39,26 +39,95 @@ dwi_maps_dir = [micapipe_deriv, '/', id, '/', ses, '/maps/'];
 
 %% structural info
 
-hemi = 'L';
 metric = 'FA';
-surf = 'fsLR-32k'
-label = 'midthickness'
-
+surfname = 'fsLR-32k';
+label = 'midthickness';
 
 % load diffusion file
-
-fname = (dwi_maps_dir, '/', id, '_', ses, '_hemi-', hemi, '_surf-',surf,'_label-',label,'_',metric,'.func.gii');
-
+hemi = 'L';
+fname = [dwi_maps_dir, '/', id, '_', ses, '_hemi-', hemi, '_surf-', surfname, '_label-', label, '_', metric,'.func.gii'];
 g = gifti(fname);
-data = g.cdata;
+dataL = g.cdata;
+nVertL = length(dataL);
 
-nVert = length(data);
+hemi = 'R';
+fname = [dwi_maps_dir, '/', id, '_', ses, '_hemi-', hemi, '_surf-', surfname, '_label-', label, '_', metric,'.func.gii'];
+g = gifti(fname);
+dataR = g.cdata;
+nVertR = length(dataR);
+
+fa = [dataL; dataR];
+figure, SurfStatViewData(fa,surf); colormap(parula); SurfStatColLim([0, 1])
+
+faSm = SurfStatSmooth(fa',surf,5);
+figure, SurfStatViewData(faSm,surf); colormap(parula); SurfStatColLim([0.2 0.8])
 
 
 %% Load parcellation
 
 parcName = 'economo';
-parcIDs = [1013 1018 1019];
+parcIDsL = [20 19 14];
+parcIDsR = [64 63 58];
+nInsulaRoi = length(parcIDsL);
+
+for load_parc = 1
+    
+    % Read parccellation for C69
+    parcFS = csvread([micapipe, '/parcellations/', parcName, '_conte69.csv']);
+    parcFS = parcFS + 1;
+
+    uparc = unique(parcFS);
+    parcFSR = parcFS(nFS/2+1:end);
+    uparcR = unique(parcFSR);
+    
+    maskCol = 1; % value of mask in parcellation
+    maskIdxFS = find(parcFS == maskCol(1));
+    maskParc = zeros(1,nFS); maskParc(1,maskIdxFS) = 1;
+    
+end
+figure, SurfStatViewData(parcFS,surf); colormap(parula); 
+
+% isolate insula parcels 
+insulaRoiL = zeros(size(parcFS));
+insulaRoiR = zeros(size(parcFS));
+for ii = 1:nInsulaRoi
+    insulaRoiL(parcFS == parcIDsL(ii)) = ii;
+    insulaRoiR(parcFS == parcIDsR(ii)) = ii;
+end
+
+figure, SurfStatViewData(insulaRoiL,surf); colormap(parula); 
+figure, SurfStatViewData(insulaRoiR,surf); colormap(parula); 
+
+
+%% Check for differences in FA across insula parcels
+
+% Left
+faVal = {};
+roiID = {};
+for roi = 1:nInsulaRoi
+    roiIdx = find(insulaRoiL == roi);
+    faVal{roi} = fa(roiIdx);
+    roiID{roi} = zeros(length(roiIdx),1)+roi;
+end
+
+tmpData = [vertcat(faVal{:}), vertcat(roiID{:})];
+figure, boxplot(tmpData(:,1), tmpData(:,2))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%
 
 for load_parc = 1
     
@@ -81,11 +150,9 @@ for load_parc = 1
         error('Parcellation and diffusion vertices unequal')
     end
   
-    % uparcR = unique(parcFSR);
-    
     maskCol = 1; % value of mask in parcellation
     maskIdxFS = find(parcFS == maskCol(1));
-    % maskParc = zeros(1,nFS); maskParc(1,maskIdxFS) = 1;
+    maskParc = zeros(1,nFS); maskParc(1,maskIdxFS) = 1;
     
 end
 
@@ -146,3 +213,4 @@ seedFC = fcStxCtx(seed,:);
 data = mica_parcelData2surfData(seedFC(ctxStart:end), surf, parcFS);
 data(maskParc == 1) = 0;
 figure, SurfStatViewData(data, surf), colormap("parula"); SurfStatColLim([0 1])
+
