@@ -112,6 +112,15 @@ for roi = 1:nInsulaRoi
     roiID{roi} = zeros(length(roiIdx),1)+roi;
 end
 
+% Right
+faVal = {};
+roiID = {};
+for roi = 1:nInsulaRoi
+    roiIdx = find(insulaRoiR == roi);
+    faVal{roi} = fa(roiIdx);
+    roiID{roi} = zeros(length(roiIdx),1)+roi;
+end
+
 tmpData = [vertcat(faVal{:}), vertcat(roiID{:})];
 figure, boxplot(tmpData(:,1), tmpData(:,2))
 
