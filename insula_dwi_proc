@@ -8,9 +8,10 @@
 for set_directories = 1
     
     % directories
-    GH = '/data/u_royer_software';
+    GH = '/data/u_nunnink_software';
     micaopen = [GH, '/micaopen'];
     micapipe = [GH, '/micapipe'];
+    micasoft = [GH, '/micasoft-master'];
     dataset = '/data/p_03140/BIDS_spacetop';
     deriv_dir = [dataset, '/derivatives'];
     micapipe_deriv = [deriv_dir, '/micapipe_v0.2.0'];
